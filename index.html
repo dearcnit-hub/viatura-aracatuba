@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Viatura - URE Araçatuba</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #1e293b; --secondary: #334155; --accent: #2563eb; --accent-hover: #1d4ed8; 
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --bg-body: #f1f5f9; 
+            --card-bg: #ffffff; --spin-color: #0ea5e9; --onix-color: #8b5cf6; 
+            --text-main: #0f172a; --text-muted: #64748b; 
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1); 
+            --radius: 12px; --border: #e2e8f0; 
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); margin: 0; padding: 20px; color: var(--text-main); }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        header { text-align: center; margin-bottom: 25px; }
+        header h2 { font-weight: 800; color: var(--primary); margin: 0; font-size: 28px; text-transform: uppercase; }
+        header h4 { color: var(--accent); margin: 5px 0 0 0; font-weight: 600; font-size: 15px; }
+
+        .dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--card-bg); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow-md); border-left: 5px solid var(--accent); }
+        .stat-value { font-size: 24px; font-weight: 800; display: block; }
+
+        .card { background: var(--card-bg); border-radius: var(--radius); padding: 25px; margin-bottom: 30px; border: 1px solid var(--border); box-shadow: var(--shadow-md); }
+        .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group-full { grid-column: 1 / -1; }
+        
+        label { font-size: 11px; font-weight: 700; margin-bottom: 6px; color: var(--secondary); text-transform: uppercase; }
+        input, select { padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; background: white; }
+
+        .btn-primary { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: 700; width: 100%; transition: 0.2s; margin-top: 10px; }
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        .filter-section { background: #1e293b; padding: 15px; border-radius: var(--radius) var(--radius) 0 0; display: flex; justify-content: center; gap: 10px; }
+        .filter-section select { background: #334155; color: white; border: none; }
+
+        .table-container { background: var(--card-bg); border-radius: 0 0 var(--radius) var(--radius); box-shadow: var(--shadow-md); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+        
+        .divisor-dia { border-top: 4px solid #cbd5e1 !important; }
+        .badge-status { font-weight: 700; padding: 5px 10px; border-radius: 5px; font-size: 10px; text-transform: uppercase; }
+        
+        .col-longa { min-width: 150px; max-width: 250px; word-wrap: break-word; white-space: normal !important; }
+        .btn-whatsapp { color: #25d366; text-decoration: none; font-size: 20px; cursor: pointer; margin-right: 15px; }
+        .btn-delete { color: var(--danger); background: none; border: none; font-size: 20px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h2>AGENDA VIATURA</h2>
+        <h4>Unidade Regional de Ensino - Araçatuba</h4>
+    </header>
+
+    <div class="dashboard">
+        <div class="stat-card"><span style="font-size:11px; font-weight:700;">TOTAL</span><span class="stat-value" id="statTotal">0</span></div>
+        <div class="stat-card" style="border-left-color: var(--spin-color)"><span style="font-size:11px; font-weight:700;">SPIN</span><span class="stat-value" id="statSpin">0</span></div>
+        <div class="stat-card" style="border-left-color: var(--onix-color)"><span style="font-size:11px; font-weight:700;">ONIX</span><span class="stat-value" id="statOnix">0</span></div>
+    </div>
+
+    <div class="card">
+        <div class="form-grid">
+            <div class="form-group"><label>📅 Saída</label><input type="date" id="dSaida"></div>
+            <div class="form-group"><label>🕒 Hora</label><input type="time" id="hSaida"></div>
+            <div class="form-group"><label>📅 Retorno</label><input type="date" id="dChegada"></div>
+            <div class="form-group"><label>🕒 Hora</label><input type="time" id="hChegada"></div>
+            <div class="form-group"><label>🚗 Viatura</label><select id="viatura"><option value="SPIN">SPIN</option><option value="ONIX">ONIX</option></select></div>
+            <div class="form-group">
+                <label>👤 Condutor</label>
+                <select id="condutor">
+                    <option value="">Selecione...</option>
+                    <option value="Marcelo Bevilaqua">Marcelo Bevilaqua</option>
+                    <option value="Helder">Helder</option><option value="Heber">Heber</option>
+                    <option value="Sandra Vieira">Sandra Vieira</option><option value="Gustavo">Gustavo</option>
+                    <option value="Juliana">Juliana</option><option value="Sonia">Sonia</option>
+                    <option value="Ágatha">Ágatha</option><option value="Patrícia">Patrícia</option>
+                    <option value="Aline SEOM">Aline SEOM</option><option value="Mirian">Mirian</option>
+                    <option value="Baraldi">Baraldi</option>
+                </select>
+            </div>
+            <div class="form-group"><label>👥 Passageiro</label><input type="text" id="passageiro"></div>
+            <div class="form-group"><label>🏢 Seção</label><input type="text" id="secao"></div>
+            <div class="form-group form-group-full">
+                <label>📍 Destino</label>
+                <select id="destino" multiple style="height: 150px;">
+                    <optgroup label="Municípios">
+                        <option value="Andradina">Andradina</option><option value="Birigui">Birigui</option>
+                        <option value="Fernandópolis">Fernandópolis</option><option value="Jales">Jales</option>
+                        <option value="Penápolis">Penápolis</option><option value="São José do Rio Preto">São José do Rio Preto</option>
+                        <option value="São Paulo">São Paulo</option><option value="Votuporanga">Votuporanga</option>
+                        <option value="Outro">Outro</option>
+                    </optgroup>
+                    <optgroup label="Escolas">
+                        <option value="Abranche José">Abranche José</option><option value="Aimone Sala">Aimone Sala</option>
+                        <option value="Altina Moraes Sampaio">Altina Moraes Sampaio</option><option value="Arlinda Pessoa Morbeck">Arlinda Pessoa Morbeck</option>
+                        <option value="Arthur Leite Carrijo">Arthur Leite Carrijo</option><option value="Ary Bocuhy">Ary Bocuhy</option>
+                        <option value="CEEJA">CEEJA</option><option value="Clóvis de Arruda Campos">Clóvis de Arruda Campos</option>
+                        <option value="David Golia">David Golia</option><option value="Ezequiel Barbosa">Ezequiel Barbosa</option>
+                        <option value="Francisco Prudente Corrêa">Francisco Prudente Corrêa</option><option value="Genésio de Assis">Genésio de Assis</option>
+                        <option value="João Arruda Brasil">João Arruda Brasil</option><option value="João Batista Botelho">João Batista Botelho</option>
+                        <option value="Jorge Corrêa">Jorge Corrêa</option><option value="José Arantes Terra">José Arantes Terra</option>
+                        <option value="José Augusto Lopes Borges">José Augusto Lopes Borges</option><option value="José Cândido">José Cândido</option>
+                        <option value="Joubert de Carvalho">Joubert de Carvalho</option><option value="Licolina V. R. Alves">Licolina V. R. Alves</option>
+                        <option value="Lídia Perri Barbosa">Lídia Perri Barbosa</option><option value="Luiz Gama">Luiz Gama</option>
+                        <option value="Manoel Bento da Cruz">Manoel Bento da Cruz</option><option value="Maria App. Balthazar Poço">Maria App. Balthazar Poço</option>
+                        <option value="Maria do Carmo Lélis">Maria do Carmo Lélis</option><option value="Nilce Maia Souto Melo">Nilce Maia Souto Melo</option>
+                        <option value="Olímpio Camargo">Olímpio Camargo</option><option value="Purcina Elisa de Almeida">Purcina Elisa de Almeida</option>
+                        <option value="Silvestre Augusto Nascimento">Silvestre Augusto Nascimento</option><option value="Vaniolê Dionysio M. Pavan">Vaniolê Dionysio M. Pavan</option>
+                        <option value="Vicente Barbosa">Vicente Barbosa</option><option value="Vitor Antônio Trindade">Vitor Antônio Trindade</option>
+                        <option value="Waldemar Queiroz">Waldemar Queiroz</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="form-group-full" style="text-align: right;"><button class="btn-primary" onclick="adicionarAgendamento()">Salvar Agendamento</button></div>
+        </div>
+    </div>
+
+    <div class="filter-section">
+        <select id="filtroMes" onchange="renderizarTabela()">
+            <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+            <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+            <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+            <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
+        <select id="filtroAno" onchange="renderizarTabela()">
+            <option value="2025">2025</option><option value="2026" selected>2026</option>
+            <option value="2027">2027</option><option value="2028">2028</option>
+            <option value="2029">2029</option><option value="2030">2030</option>
+        </select>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead><tr><th>Saída</th><th>Hora</th><th>Retorno</th><th>Hora</th><th class="col-longa">Destino</th><th>Viatura</th><th class="col-longa">Condutor</th><th>Passageiro</th><th>Seção</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const URL_DATABASE = "https://script.google.com/macros/s/AKfycby3eT0a4Nk9UJRauZ4xMopOcl_9CoiaBBZVzJKx18sXxGpRhYDdxSQVVdu4U1cJ13Hp/exec";
+    let dadosGlobais = [];
+
+    async function adicionarAgendamento() {
+        const btn = document.querySelector('.btn-primary');
+        const destinos = Array.from(document.getElementById('destino').selectedOptions).map(o => o.value);
+        const fields = {
+            dSaida: document.getElementById('dSaida').value,
+            hSaida: document.getElementById('hSaida').value,
+            dChegada: document.getElementById('dChegada').value,
+            hChegada: document.getElementById('hChegada').value,
+            viatura: document.getElementById('viatura').value,
+            condutor: document.getElementById('condutor').value,
+            passageiro: document.getElementById('passageiro').value,
+            secao: document.getElementById('secao').value,
+            destino: destinos.join(", ")
+        };
+        if(!fields.dSaida || !fields.condutor || destinos.length === 0) return alert("Preencha Data, Condutor e Destino!");
+        btn.innerText = "Gravando..."; btn.disabled = true;
+        try {
+            await fetch(URL_DATABASE, { method: 'POST', body: JSON.stringify(fields) });
+            alert("Agendamento salvo!");
+            location.reload();
+        } catch (e) { alert("Erro ao salvar."); btn.disabled = false; btn.innerText = "Salvar Agendamento"; }
+    }
+
+    function calcularStatus(dS, hS, dC, hC) {
+        const agora = new Date();
+        const inicio = new Date(`${dS.split('/').reverse().join('-')}T${hS || '00:00'}`);
+        const fimData = (dC && dC !== "-") ? dC.split('/').reverse().join('-') : dS.split('/').reverse().join('-');
+        const fim = new Date(`${fimData}T${hC || '23:59'}`);
+
+        if (agora > fim) return { txt: 'Concluído', bg: '#dcfce7', tc: '#166534' };
+        if (agora >= inicio && agora <= fim) return { txt: 'Em Trânsito', bg: '#fef9c3', tc: '#854d0e' };
+        return { txt: 'Agendado', bg: '#dbeafe', tc: '#1e40af' };
+    }
+
+    async function renderizarTabela() {
+        const corpo = document.getElementById('corpoTabela');
+        corpo.innerHTML = "<tr><td colspan='11' style='text-align:center'>Sincronizando...</td></tr>";
+        try {
+            const res = await fetch(URL_DATABASE);
+            dadosGlobais = await res.json();
+            
+            dadosGlobais.sort((a, b) => {
+                const dataA = new Date(a.dSaida.split('/').reverse().join('-') + 'T' + (a.hSaida || '00:00'));
+                const dataB = new Date(b.dSaida.split('/').reverse().join('-') + 'T' + (b.hSaida || '00:00'));
+                return dataA - dataB;
+            });
+
+            const mesSel = document.getElementById('filtroMes').value;
+            const anoSel = document.getElementById('filtroAno').value;
+
+            const filtrados = dadosGlobais.filter(item => {
+                const d = item.dSaida || "";
+                return (d.includes(`/${mesSel}/`) && d.includes(anoSel)) || d.includes(`${anoSel}-${mesSel}`);
+            });
+
+            corpo.innerHTML = filtrados.length ? "" : "<tr><td colspan='11' style='text-align:center'>Sem registros.</td></tr>";
+            
+            let ultimoDia = "";
+            filtrados.forEach((item) => {
+                const rowIdx = dadosGlobais.indexOf(item);
+                let dExib = item.dSaida; if(dExib.includes('-')) dExib = dExib.split('-').reverse().join('/');
+                let rExib = item.dChegada; if(rExib.includes('-')) rExib = rExib.split('-').reverse().join('/');
+
+                const status = calcularStatus(dExib, item.hSaida, rExib, item.hChegada);
+                const classeDivisor = (ultimoDia !== "" && ultimoDia !== dExib) ? "divisor-dia" : "";
+                ultimoDia = dExib;
+
+                corpo.innerHTML += `<tr class="${classeDivisor}">
+                    <td><b>${dExib}</b></td><td>${item.hSaida}</td>
+                    <td>${rExib || '-'}</td><td>${item.hChegada || '-'}</td>
+                    <td class="col-longa"><b>${item.destino}</b></td>
+                    <td>${item.viatura}</td><td class="col-longa">${item.condutor}</td>
+                    <td>${item.passageiro || '-'}</td><td>${item.secao || '-'}</td>
+                    <td><span class="badge-status" style="background:${status.bg}; color:${status.tc}">${status.txt}</span></td>
+                    <td style="white-space:nowrap">
+                        <a class="btn-whatsapp" onclick="enviarZap(${rowIdx})">📲</a>
+                        <button class="btn-delete" onclick="excluir(${rowIdx})">×</button>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('statTotal').innerText = filtrados.length;
+            document.getElementById('statSpin').innerText = filtrados.filter(i => i.viatura.includes('SPIN')).length;
+            document.getElementById('statOnix').innerText = filtrados.filter(i => i.viatura.includes('ONIX')).length;
+        } catch (e) { corpo.innerHTML = "<tr><td colspan='11' style='text-align:center'>Erro ao carregar dados.</td></tr>"; }
+    }
+
+    function enviarZap(idx) {
+        const item = dadosGlobais[idx];
+        let d = item.dSaida; if(d.includes('-')) d = d.split('-').reverse().join('/');
+        const msg = `Olá *${item.condutor}*, viagem confirmada para *${item.destino}*:\\n📅 *Saída:* ${d} às ${item.hSaida}`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    async function excluir(idx) {
+        if(confirm("Deseja apagar este registro permanentemente?")) {
+            const item = dadosGlobais[idx];
+            item.action = 'delete';
+            try {
+                await fetch(URL_DATABASE, { method: 'POST', body: JSON.stringify(item) });
+                location.reload();
+            } catch (e) { alert("Erro ao excluir."); }
+        }
+    }
+
+    window.onload = () => {
+        const hoje = new Date();
+        document.getElementById('filtroMes').value = String(hoje.getMonth() + 1).padStart(2, '0');
+        renderizarTabela();
+    };
+</script>
+</body>
+</html>
